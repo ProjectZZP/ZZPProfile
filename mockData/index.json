@@ -1,0 +1,37 @@
+[
+        {
+                "profileId": "profile-1",
+                "entityId": "entity-1",
+                "title": "All round Java developer",
+                "description": "For all you development issues",
+                "tags": [ "tag-1", "tag-2", "tag-3" ]
+        },
+        {
+                "profileId": "profile-2",
+                "entityId": "entity-1",
+                "title": "Software architect",
+                "description": "For all you design issues",
+                "tags": [ "tag-1", "tag-2", "tag-3" ]
+        },
+        {
+                "profileId": "profile-3",
+                "entityId": "entity-2",
+                "title": "All round C# developer",
+                "description": "For all you development issues",
+                "tags": [ "tag-1", "tag-2", "tag-3" ]
+        },
+        {
+                "profileId": "profile-4",
+                "entityId": "entity-3",
+                "title": "All round tester",
+                "description": "For all you software test work",
+                "tags": [ "tag-1", "tag-2", "tag-3" ]
+        },
+        {
+                "profileId": "profile-5",
+                "entityId": "entity-4",
+                "title": "All round plumber",
+                "description": "For all you plumbing work",
+                "tags": [ "tag-1", "tag-2", "tag-3" ]
+        }
+]
