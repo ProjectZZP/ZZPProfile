@@ -3,3 +3,5 @@
 /initNode.cmd
 /npm-debug.log
 /dist
+/ubuntu-xenial-16.04-cloudimg-console.log
+/.vagrant

@@ -46,8 +46,12 @@ router.route('/profile')
 router.route('/profile/:id')
     .get(function(req, res) {
 
-        let result = mockData.filter((item) => (item.profileId === req.params.id));
-        //res.json({ message: 'Bear created!' + req.params.id });
+        let resultList = mockData.filter((item) => (item.profileId === req.params.id));
+
+        let result = {};
+        if (resultList.length === 1) {
+            result = resultList[0];
+        }
         res.json(result);
 
     });

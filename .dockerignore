@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+dist
+.idea
+npm-debug.log
+ubuntu-xenial-16.04-cloudimg-console.log
+Vagrantfile
+Dockerfile
+buildImage.sh
