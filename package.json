@@ -3,7 +3,13 @@
   "version": "0.0.1",
   "main": "server.js",
   "dependencies": {
-    "express": "~4.0.0",
-    "body-parser": "~1.0.1"
+    "async": "^2.1.5",
+    "aws-sdk": "~2.28.0",
+    "body-parser": "~1.0.1",
+    "cors": "^2.8.1",
+    "express": "~4.0.0"
+  },
+  "scripts": {
+    "dev": "npm --bucket=zinder-s33 start"
   }
 }
