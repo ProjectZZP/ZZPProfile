@@ -36,26 +36,26 @@ router.route('/profile')
     //.post(function(req, res) {
     .get(function(req, res) {
 
-       // let body = req.body.name; // example for Post
+        console.log('req.query.entityId', req.query.entityId);
+        if (!req.query.entityId) {
+            // return all profileId's
+            console.log('GET ALL');
+            let result = mockData.map((item) => (item.profileId));
+            res.json(result);
+            return;
+        }
 
-        let result = mockData.map((item) => (item.profileId));
-        res.json(result);
-
+        let resultList = mockData.filter((item) => (item.entityId === req.query.entityId));
+        res.json(resultList);
     });
 
 router.route('/profile/:id')
     .get(function(req, res) {
 
-        let resultList = mockData.filter((item) => (item.profileId === req.params.id));
-
-        let result = {};
-        if (resultList.length === 1) {
-            result = resultList[0];
-        }
+        let result = getProfileFromStore((item) => (item.profileId === req.params.id));
         res.json(result);
 
     });
-
 
 
 // REGISTER OUR ROUTES -------------------------------
@@ -73,3 +73,15 @@ app.use('/api', router);
 // =============================================================================
 app.listen(port);
 console.log('Magic happens on port ' + port);
+
+
+
+function getProfileFromStore(condition) {
+    let resultList = mockData.filter(condition);
+
+    let result = {};
+    if (resultList.length === 1) {
+        result = resultList[0];
+    }
+    return result;
+}
