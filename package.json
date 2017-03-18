@@ -7,9 +7,20 @@
     "aws-sdk": "~2.28.0",
     "body-parser": "~1.0.1",
     "cors": "^2.8.1",
-    "express": "~4.0.0"
+    "express": "~4.0.0",
+    "rx": "^4.1.0"
+  },
+  "devDependencies": {
+    "aws-sdk-mock": "^1.6.1",
+    "aws-sdk": "^2.3.0",
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.6",
+    "nyc": "^10.0.0"
   },
   "scripts": {
-    "dev": "npm --bucket=zinder-s33 start"
+    "dev": "npm --bucket=zinder-s33 start",
+    "test2": "npm --bucket=zinder-s33 run tst",
+    "tst": "node ./node_modules/mocha/bin/mocha"
   }
 }
