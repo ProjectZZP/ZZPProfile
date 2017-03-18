@@ -92,7 +92,7 @@ class ProfileRepo {
                     const y = Object.assign(profile, {eventId: 'singleton'});
                     console.log('y', y)
                     const param = {
-                        TableName : 'DynamoDB',
+                        TableName : 'event',
                         ReturnConsumedCapacity: 'TOTAL',
                         Item: y
                     };
