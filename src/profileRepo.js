@@ -13,6 +13,7 @@ const async = require("async");
 const mockData = require('../mockData');
 
 const AWS = require('aws-sdk');
+var Rx = require('rx');
 
 exports.getRepository = function(context) {
     const s3 = new AWS.S3();
@@ -46,6 +47,19 @@ class ProfileRepo {
             callback(null, {});
         });
 
+    }
+
+
+    getByIdObs(profileId) {
+
+        const obs = _getDataObs();
+        obs.map(val => {
+            let resultList = data.filter((item) => (item.profileId === profileId));
+            if (resultList.length === 1) {
+                return resultList[0];
+            }
+            return {}';'
+        });
     }
 
     getByEntityId(entityId, callback) {
@@ -119,4 +133,16 @@ class ProfileRepo {
             callback (err, result);
         });
     }
+
+    _getDataObs() {
+        const param = {Bucket: bucket, Key: key, ResponseContentType: 'application/json'};
+        return Rx.Observable.create(observer => {
+            s3.getObject(param, (err, data) => {
+                console.log('getObject...');
+                if (err) observer.onError(err);
+                observer.onNext(JSON.parse(data.Body));
+                observer.onCompleted();
+            });
+        });    }
+
 }

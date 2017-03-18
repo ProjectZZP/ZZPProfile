@@ -82,16 +82,46 @@ describe('myModule', function() {
            // const upload = s3.getObject(param);
             const getObjectRs = Rx.Observable.create(observer => {
                 s3.getObject(param, (err, data) => {
-                    //console.log('CB...');
+                    console.log('CB1...');
                     if (err)
                         observer.onError(err);
                     let result = JSON.parse(data.Body);
-                    observer.onNext(result);
+                    observer.onNext('Result1');
                     observer.onCompleted();
                 });
             });
 
+            function getObjectRs2Observer(p) {
+                return Rx.Observable.create(observer => {
+                    s3.getObject(param, (err, data) => {
+                        console.log('CB2...', p);
+                        if (err)
+                            observer.onError(err);
+                        let result = JSON.parse(data.Body);
+                        observer.onNext(result);
+                        observer.onCompleted();
+                    });
+                });
+
+            }
+            // getObjectRs
+            //     .subscribe(val => {
+            //         console.log('getObject result:', val);
+            //         done();
+            //     }, err => {
+            //         console.log('err:', err);
+            //         done();
+            //     });
+
             getObjectRs
+                .map(val => {
+                    console.log('in map', val)
+                    return 'dfdfd';
+                })
+                .flatMap(val => {
+                    console.log('flatmap', val);
+                    return getObjectRs2Observer('val');
+                })
                 .subscribe(val => {
                     console.log('getObject result:', val);
                     done();
@@ -99,7 +129,6 @@ describe('myModule', function() {
                     console.log('err:', err);
                     done();
                 });
-
 
 
             //upload$.subscribe(v => {console.log(v); done()}); // will print file details
