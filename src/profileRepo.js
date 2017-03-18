@@ -16,13 +16,15 @@ const AWS = require('aws-sdk');
 
 exports.getRepository = function(context) {
     const s3 = new AWS.S3();
-    return new ProfileRepo(s3);
+    const dynamo = new AWS.DynamoDB.DocumentClient({region : 'us-west-2'});
+    return new ProfileRepo(s3, dynamo);
 }
 
 class ProfileRepo {
 
-    constructor(s3) {
+    constructor(s3, dynamo) {
         this.s3 = s3;
+        this.dynamo = dynamo;
     }
 
     getAll(callback) {
@@ -69,8 +71,23 @@ class ProfileRepo {
                     const newData = data.filter((item) => (item.profileId !== profile.profileId));
                     newData.push(profile);
                     this._putData(newData, (err) => {
-                        done(err);
+                        done(err, profile);
                     })
+                },
+                (profile, done) => {
+                    const y = Object.assign(profile, {eventId: 'singleton'});
+                    console.log('y', y)
+                    const param = {
+                        TableName : 'DynamoDB',
+                        ReturnConsumedCapacity: 'TOTAL',
+                        Item: y
+                    };
+                    console.log('profile to put in Dynamo:', param)
+                    this.dynamo.put(param, (err, data) => {
+                        console.log('Result from dynamo put', err);
+                        console.log('Result from dynamo put', data);
+                        done(err);
+                    });
                 }
             ],
             function (err) {
