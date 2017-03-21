@@ -7,6 +7,7 @@ const app        = express();                 // define our app using express
 const bodyParser = require('body-parser');
 
 const AWS = require('aws-sdk');
+const Rx = require('rx');
 
 const mockData = require('./mockData');
 const repo = require('./src/profileRepo.js').getRepository();
@@ -17,11 +18,11 @@ const repo = require('./src/profileRepo.js').getRepository();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var port = process.env.PORT || 8080;        // set our port
+const port = process.env.PORT || 8080;        // set our port
 
 // ROUTES FOR OUR API
 // =============================================================================
-var router = express.Router();              // get an instance of the express Router
+const router = express.Router();              // get an instance of the express Router
 
 
 const corsOptions = {
@@ -38,78 +39,40 @@ router.get('/', function(req, res) {
 
 
 router.route('/profile')
-
     .get(function(req, res) {
 
-        console.log('req.query.entityId', req.query.entityId);
         if (!req.query.entityId) {
             // return all profileId's
-            repo.getAll((err, data) => {
-                if (err) {
-                    res.status(500).send(JSON.stringify(err));
-                    return;
-                }
-                let result = data.map((item) => (item.profileId));
-                res.json(result);
-            });
+            repo.getAllObs()
+                .map(data => (data.map(item => (item.profileId))))
+                .subscribe(responseObserver(res));
             return;
         }
 
         // get an item by entityId
-        repo.getByEntityId(req.query.entityId, (err, data) => {
-            if (err) {
-                res.status(500).send(JSON.stringify(err));
-                return;
-            }
-            res.json(data);
-        })
+        repo.getByEntityIdObs(req.query.entityId)
+            .subscribe(responseObserver(res));
     });
 
 
 router.route('/profile')
-
     .post(function(req, res) {
-
-        let data;
-        try {
-            data = extractAndValidateData(req.body);
-        } catch(e) {
-            console.log('error', e);
-            res.status(500).send(e.message);
-            return;
-        }
-        repo.putProfile(data, (err) => {
-            if (err) {
-                res.status(500).send(err);
-                return;
-            }
-            res.json(data);
-        })
+        extractAndValidateDataObservable(req.body)
+            .flatMap(data => repo.putProfileObs(data))
+            .subscribe(responseObserver(res));
     });
 
 router.route('/profile/:id')
     .get(function(req, res) {
-
-        repo.getById(req.params.id, (err, data) => {
-            if (err) {
-                res.status(500).send(JSON.stringify(err));
-                return;
-            }
-            res.json(data);
-        })
+        repo.getByIdObs(req.params.id)
+            .subscribe(responseObserver(res));
     });
 
 
 router.route('/init')
     .get(function(req, res) {
-
-        repo.putMock((err, data) =>  {
-            let result = {
-                "err": err,
-                "data": data
-            };
-            res.json(result);
-        })
+        repo.putMockObs()
+            .subscribe(responseObserver(res));
     });
 
 
@@ -125,19 +88,35 @@ app.use('/api', router);
 app.listen(port);
 console.log('Magic happens on port ' + port);
 
+function extractAndValidateDataObservable(body) {
+    return Rx.Observable.create(
+        observer => {
+            let data;
+            try {
+                data = {
+                    profileId: getMandatoryProperty(body, 'profileId'),
+                    entityId: getMandatoryProperty(body, 'entityId'),
+                    title: getMandatoryProperty(body, 'title'),
+                    description: getMandatoryProperty(body, 'description'),
+                    tags: body.tags
+                };
+            } catch (e) {
+                observer.onError(e.message);
+            }
+            observer.onNext(data);
+            observer.onCompleted();
+        }
+    );
+}
 
+function getMandatoryProperty(obj, propName) {
+    if (!obj[propName]) throw new Error(`${propName} is mandatory`);
+    return obj[propName];
+}
 
-function extractAndValidateData(body) {
-    if (!body.profileId) throw new Error("profileId is mandatory");
-    if (!body.entityId) throw new Error("entityId is mandatory");
-    if (!body.title) throw new Error("title is mandatory");
-    if (!body.description) throw new Error("description is mandatory");
-
-    return {
-        profileId: body.profileId,
-        entityId: body.entityId,
-        title: body.title,
-        description: body.description,
-        tags: body.tags
-    };
+function responseObserver(res) {
+    return Rx.Observer.create(
+        val => res.json(val),
+        err => res.status(500).send(JSON.stringify(err)),
+        () => console.log('onCompleted'));
 }
