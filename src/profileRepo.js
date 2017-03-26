@@ -55,28 +55,18 @@ class ProfileRepo {
 
     _putDataObs(body) {
         const param = {Bucket: bucket, Key: key, Body: JSON.stringify(body), ContentType: 'application/json'};
-        return Rx.Observable.create(observer => {
-            this.s3.upload(param, (err, data) => {
-                console.log('s3.upload callback', err, data);
-                if (err) observer.onError(err);
-                observer.onNext(data);
-                observer.onCompleted();
-            });
-        });
+        const upload = Rx.Observable.fromNodeCallback(this.s3.upload, this.s3);
+        return upload(param);
     }
 
-    // http://xgrommx.github.io/rx-book/content/observable/observable_methods/fromnodecallback.html
+
     _getDataObs() {
         const param = {Bucket: bucket, Key: key, ResponseContentType: 'application/json'};
-        return Rx.Observable.create(observer => {
-            this.s3.getObject(param, (err, data) => {
-                if (err)
-                    observer.onError(err);
-                observer.onNext(data);
-                observer.onCompleted();
-            });
-        }).map(data => (JSON.parse(data.Body)));
+        const getObject = Rx.Observable.fromNodeCallback(this.s3.getObject, this.s3);
+        return getObject(param)
+            .map(data => JSON.parse(data.Body));
     }
+
 
     _putDynamoObs(profile) {
         const param = {
